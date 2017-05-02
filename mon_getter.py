@@ -96,35 +96,35 @@ def get_filters():
     enconn.close()
     return f
 
-
 def parse_tweet_json():
     global tweets
     tweets = pd.DataFrame()
     for tweet in a2_tweets:
-        try:
-            twt = pd.Series()
-            twt.name = tweet.id
-            twt['text'] = tweet.text
-            twt['url'] = tweet.entities['urls'][0]['expanded_url']
-            strang = tweet.text.split(' ')
-            twt['poke_name'] = strang[0]
-            twt['endtime'] = parser.parse(strang[2])
-            twt['endtime'] = pd.to_datetime(twt['endtime'])
-            if (rightnow.hour == 23) and (twt['endtime'].hour == 0):
-                twt['endtime'] = twt['endtime'] + datetime.timedelta(days=1)
-            print twt['poke_name'], twt['endtime']
-            if len(strang) < 14:
-                twt['iv'] = 0
-            else:
-                twt['iv'] = float(strang[5].rstrip('%'))
-            latlon = twt['url'].split('=')[1].split(',')
-            twt['lat'] = float(latlon[0])
-            twt['lon'] = float(latlon[1])
-            twt['close'] = " ".join(strang[-5:])
-            tweets = tweets.append(twt)
-        except:
-            print("ERROR: " + str(tweet.id))
-            pass
+        # try:
+        twt = pd.Series()
+        twt.name = tweet.id
+        twt['text'] = tweet.text
+        twt['url'] = tweet.entities['urls'][0]['expanded_url']
+        strang = tweet.text.split(' ')
+        twt['poke_name'] = strang[0]
+        twt['endtime'] = parser.parse(strang[2])
+        twt['endtime'] = pd.to_datetime(twt['endtime'])
+        if (rightnow.hour == 23) and (twt['endtime'].hour == 0):
+            twt['endtime'] = twt['endtime'] + datetime.timedelta(days=1)
+        print twt['poke_name'], twt['endtime']
+        if len(strang) < 14:
+            twt['iv'] = 0
+        else:
+            twt['iv'] = float(strang[7].rstrip('%'))
+        latlon = twt['url'].split('=')[1].split(',')
+        twt['lat'] = float(latlon[0])
+        twt['lon'] = float(latlon[1])
+        twt['close'] = " ".join(strang[-5:])
+        print twt
+        tweets = tweets.append(twt)
+        # except:
+        #     print("ERROR: " + str(tweet.id))
+        #    pass
 
     if len(tweets) > 0:
         tweets = tweets[tweets['endtime'] > rightnow]
@@ -157,7 +157,7 @@ def filter_mons():
                     .format(row['person_name'], keeperrow['poke_name'], keeperrow['distance_km'],
                             keeperrow['bearing'], keeperrow['endtime'], keeperrow['url'])
                 print message
-                send_sms(message, row['person_phone'])
+                send_sms(message, row['phone'])
 
 
 def send_sms(body, tophone):
