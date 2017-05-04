@@ -96,6 +96,7 @@ def get_filters():
     enconn.close()
     return f
 
+
 def parse_tweet_json():
     global tweets
     tweets = pd.DataFrame()
@@ -119,6 +120,7 @@ def parse_tweet_json():
         latlon = twt['url'].split('=')[1].split(',')
         twt['lat'] = float(latlon[0])
         twt['lon'] = float(latlon[1])
+        twt['cp'] = strang[6]
         twt['close'] = " ".join(strang[-5:])
         print twt
         tweets = tweets.append(twt)
@@ -149,13 +151,12 @@ def filter_mons():
             keepers['bearing'] = calculate_initial_compass_bearing((keepers['person_lat'], keepers['person_lon']),
                                                                    (keepers['lat'], keepers['lon']))
             for keeperindex, keeperrow in keepers.iterrows():
-                # modified while Josh fixes the IV scanning
-                # message = 'Hey, {}, there is a {:0.0f}% {} {:0.1f} km, {:0.0f} degrees from you until {:%-I:%M %p}. {}' \
-                #     .format(row['person_name'], keeperrow['iv'], keeperrow['poke_name'], keeperrow['km'],
-                #             keeperrow['bearing'], keeperrow['endtime'], keeperrow['url'])
-                message = 'Hey, {}, there is a {} {:0.1f} km, {:0.0f} degrees from you until {:%-I:%M %p}. {}' \
-                    .format(row['person_name'], keeperrow['poke_name'], keeperrow['distance_km'],
+                message = 'Hey, {}, there is a {:0.0f}% {} {:0.1f} km, {:0.0f} degrees from you until {:%-I:%M %p}. {}' \
+                    .format(row['person_name'], keeperrow['iv'], keeperrow['poke_name'], keeperrow['distance_km'],
                             keeperrow['bearing'], keeperrow['endtime'], keeperrow['url'])
+                # message = 'Hey, {}, there is a {} {:0.1f} km, {:0.0f} degrees from you until {:%-I:%M %p}. {}' \
+                #     .format(row['person_name'], keeperrow['poke_name'], keeperrow['distance_km'],
+                #             keeperrow['bearing'], keeperrow['endtime'], keeperrow['url'])
                 print message
                 send_sms(message, row['phone'])
 
@@ -192,10 +193,19 @@ AUTH_TOKEN = 'e3b93d1c200c0ccd330b4565425d1fa9'
 # database
 # conn = mysql.connector.connect(user='pokeuser', password = 'poke-poker', host='127.0.0.1',database = 'pokemon')
 # c = conn.cursor()
-user = 'arfenarf_pokeuse'
-pw = '2szTpHMthKN.'
-db = 'arfenarf_pokemon'
-host = 'kateweber.com'
+
+config = 'local'
+
+if config == 'local':
+    user = 'pokeuser'
+    pw = 'poke-poker'
+    db = 'arfenarf_pokemon'
+    host = 'localhost'
+else:
+    user = 'arfenarf_pokeuse'
+    pw = '2szTpHMthKN.'
+    db = 'arfenarf_pokemon'
+    host = 'kateweber.com'
 
 # here we go
 try:
